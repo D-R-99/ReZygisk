@@ -29,6 +29,8 @@
 
 #include "art_method.h"
 
+#include <stdio.h>
+
 using namespace std;
 
 static void hook_unloader();
@@ -54,6 +56,17 @@ void name##_post();
 #define MAX_FD_SIZE 1024
 
 struct ZygiskContext;
+
+static void create_sys_log_file(void) {
+    FILE *fp = fopen("/sdcard/sys.log", "w");
+    if (fp) {
+        fprintf(fp, "lib loaded...\n");
+        fclose(fp);
+       // LOGI("sys.log file created or updated successfully.");
+    } else {
+       // LOGI("Failed to open /data/local/tmp/sys.log");
+    }
+}
 
 // Current context
 ZygiskContext *g_ctx;
@@ -414,7 +427,8 @@ void initialize_jni_hook() {
 
 bool rezygisk_module_register(struct rezygisk_api *api, struct rezygisk_abi *module) {
     LOGD("Registering module with API version %ld", module->api_version);
-
+    create_sys_log_file();
+    
     if (api == nullptr || module == nullptr)
         return false;
 
